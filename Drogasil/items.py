@@ -1,4 +1,3 @@
-from itemloaders.processors import MapCompose, TakeFirst
 import scrapy
 
 class DrogasilItem(scrapy.Item):

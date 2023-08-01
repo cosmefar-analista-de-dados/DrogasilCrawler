@@ -1,7 +1,16 @@
 {
     "meta": {
         "author": "gabriel-barata",
-        "version": "0.1"
+        "version": "0.1",
+        "name": "drogasil",
+        "url": "https://www.drogasil.com.br",
+        "allowed_domains": [
+            "drogasil.com.br"
+        ],
+        "routes": [
+            "cosmeticos.html",
+            "beleza.html"
+        ]
     },
     "selectors": {
         "items": {
@@ -10,9 +19,9 @@
                 "brand": "li.brand::text",
                 "volume": "li.quantity::text",
                 "sku": "table tbody tr:nth-child(1) div::text",
-                "manufacturer": "table tbody tr:nth-child(6) a::text",
+                "manufacturer": "table tbody th:contains(\"Fabricante\") + td a::text",
                 "EAN": "table tbody tr:nth-child(2) div::text",
-                "weight": "table tbody tr:nth-child(3) div::text",
+                "weight": "table tbody th:contains(\"Peso (kg)\") + td div::text",
                 "description": "div[class*=\"ProductDescriptionStyle\"] p::text"
             }
         },

@@ -5,14 +5,17 @@ from math import ceil
 import scrapy
 
 env = get_config()
-
+item_selectors = env.get('selectors').get('items')
+attr_selectors = env.get('selectors').get('attributes')
 class DrogasilSpider(scrapy.Spider):
-    name = "drogasil"
-    allowed_domains = ["drogasil.com.br"]
+    name = env.get('meta').get('crawler')
+    allowed_domains = [
+        allowed_domain for allowed_domain in env.get('meta').get('allowed_domains')
+    ]
 
     def start_requests(self):
-        initial_routes = ['cosmeticos.html']
-        domain = 'https://www.drogasil.com.br'
+        initial_routes = [route for route in env.get('meta').get('routes')]
+        domain = env.get('meta').get('url')
 
         for route in initial_routes:
             relative_url = urljoin(domain, route)
@@ -25,14 +28,11 @@ class DrogasilSpider(scrapy.Spider):
         route = response.meta['route']
         domain = response.meta['domain']
 
-        categories = response.css('#filter-categories ol li a::attr(href)').getall()
+        categories = response.css(attr_selectors.get('css').get('categories')).getall()
 
         for category in categories:
-            if route in category:
-                category_url = urljoin(domain, category)
-            else:
-                domain = urljoin(domain, route)
-                category_url = urljoin(domain, category.split('/')[-1])
+
+            category_url = urljoin(domain, category)
 
             yield scrapy.Request(url = category_url,
                                  callback = self.parse_relative_page,
@@ -43,7 +43,7 @@ class DrogasilSpider(scrapy.Spider):
 
         domain = response.meta['domain']
 
-        sub_categories = response.css('#filter-categories ol li a::attr(href)').getall()
+        sub_categories = response.css(attr_selectors.get('css').get('sub_categories')).getall()
         for sub_category in sub_categories:
 
             sub_category_url = urljoin(domain, sub_category)
@@ -58,7 +58,7 @@ class DrogasilSpider(scrapy.Spider):
         page = response.meta['page_num']
 
         product_pages = response.css(
-            'div[class*="ProductCardStyle"] > a.LinkNext::attr(href)'
+            attr_selectors.get('css').get('product_page')
         ).getall()
 
         for product_page in product_pages:
@@ -69,7 +69,8 @@ class DrogasilSpider(scrapy.Spider):
 
         if page == 1:
 
-            total_results = int(response.css('div[class*="FoundStyles"] p::text').get())
+            total_results = int(response.css(
+                attr_selectors.get('css').get('total_results')).get())
             number_pages = ceil(
                 total_results / env.get('page_patterns').get('results_per_page'))
 
@@ -87,20 +88,16 @@ class DrogasilSpider(scrapy.Spider):
         item = DrogasilItem()
 
         item['url'] = response.url,
-        item['sku'] = response.css('table tbody tr:nth-child(1) div::text').get(),
-        item['EAN'] = response.css('table tbody tr:nth-child(2) div::text').get(),
-        item['product'] = response.css('h1[class*="TitleStyles"]::text').get(),
-        item['brand'] = response.css('li.brand::text').get(),
-        item['quantity'] = response.css('li.quantity::text').get(),
-        item['weight'] = response.css(
-            'table tbody th:contains("Peso (kg)") + td div::text').get(),
-        item['manufacturer'] = response.css(
-            'table tbody th:contains("Fabricante") + td a::text').get(),
-        item['description'] = response.css(
-            'div[class*="ProductDescriptionStyle"] p::text').getall(),
+        item['sku'] = response.css(item_selectors.get('css').get('sku')).get(),
+        item['EAN'] = response.css(item_selectors.get('css').get('EAN')).get(),
+        item['product'] = response.css(item_selectors.get('css').get('product_name')).get(),
+        item['brand'] = response.css(item_selectors.get('css').get('brand')).get(),
+        item['quantity'] = response.css(item_selectors.get('css').get('volume')).get(),
+        item['weight'] = response.css(item_selectors.get('css').get('weight')).get(),
+        item['manufacturer'] = response.css(item_selectors.get('css').get('manufacturer')).get(),
+        item['description'] = response.css(item_selectors.get('css').get('description')).getall(),
         item['category'] = current_page,
         item['sub_category'] = current_page
-        item['price'] = response.css(
-            'div[class*="ThirdColumnStyles"] div.price-box .price ::text').getall()
+        item['price'] = response.css(item_selectors.get('css').get('price')).getall()
 
         yield item

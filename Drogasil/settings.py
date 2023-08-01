@@ -54,13 +54,11 @@ ROBOTSTXT_OBEY = False
 #}
 
 # Configure item pipelines
-# See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "Drogasil.pipelines.DrogasilPipeline": 300,
-#}
+ITEM_PIPELINES = {
+    "Drogasil.pipelines.DrogasilCleaning": 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
-# See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
 # The initial download delay
 #AUTOTHROTTLE_START_DELAY = 5
