@@ -64,8 +64,7 @@ class DrogasilSpider(scrapy.Spider):
         for product_page in product_pages:
             yield scrapy.Request(url = product_page,
                                  callback = self.parse_product,
-                                 meta = {'current_page': current_page,
-                                         'playwright': True
+                                 meta = {'current_page': current_page
                                          })
 
         if page == 1:
