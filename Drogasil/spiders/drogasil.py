@@ -37,13 +37,11 @@ class DrogasilSpider(scrapy.Spider):
             yield scrapy.Request(url = category_url,
                                  callback = self.parse_relative_page,
                                  meta = {'domain': domain,
-                                         'route': route,
-                                         'category': category})
+                                         'route': route})
 
     def parse_relative_page(self, response):
 
         domain = response.meta['domain']
-        category = response.meta['category']
 
         sub_categories = response.css('#filter-categories ol li a::attr(href)').getall()
         for sub_category in sub_categories:
