@@ -12,3 +12,6 @@ class DrogasilItem(scrapy.Item):
     weight = scrapy.Field()
     manufacturer = scrapy.Field()
     description = scrapy.Field()
+    category = scrapy.Field()
+    sub_category = scrapy.Field()
+    price = scrapy.Field()

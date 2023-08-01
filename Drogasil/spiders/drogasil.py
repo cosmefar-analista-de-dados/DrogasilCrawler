@@ -37,11 +37,13 @@ class DrogasilSpider(scrapy.Spider):
             yield scrapy.Request(url = category_url,
                                  callback = self.parse_relative_page,
                                  meta = {'domain': domain,
-                                         'route': route})
+                                         'route': route,
+                                         'category': category})
 
     def parse_relative_page(self, response):
 
         domain = response.meta['domain']
+        category = response.meta['category']
 
         sub_categories = response.css('#filter-categories ol li a::attr(href)').getall()
         for sub_category in sub_categories:
@@ -63,7 +65,10 @@ class DrogasilSpider(scrapy.Spider):
 
         for product_page in product_pages:
             yield scrapy.Request(url = product_page,
-                                 callback = self.parse_product)
+                                 callback = self.parse_product,
+                                 meta = {'current_page': current_page,
+                                         'playwright': True
+                                         })
 
         if page == 1:
 
@@ -76,10 +81,12 @@ class DrogasilSpider(scrapy.Spider):
                 yield scrapy.Request(url = next_page,
                                      callback =self.parse_page,
                                      meta = {'current_page': current_page,
-                                             'page_num': page_num})
+                                             'page_num': page_num
+                                             })
 
     def parse_product(self, response):
 
+        current_page = response.meta['current_page']
         item = DrogasilItem()
 
         item['url'] = response.url,
@@ -93,6 +100,10 @@ class DrogasilSpider(scrapy.Spider):
         item['manufacturer'] = response.css(
             'table tbody th:contains("Fabricante") + td a::text').get(),
         item['description'] = response.css(
-            'div[class*="ProductDescriptionStyle"] p::text').getall()
+            'div[class*="ProductDescriptionStyle"] p::text').getall(),
+        item['category'] = current_page,
+        item['sub_category'] = current_page
+        item['price'] = response.css(
+            'div[class*="ThirdColumnStyles"] div.price-box .price ::text').getall()
 
         yield item
